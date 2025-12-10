@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Nepali Varna Malaa — Full Learning System</title>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<style>
+:root{
+  --bg1:#fce3f2;
+  --bg2:#d9e8ff;
+  --card:#fff;
+  --accent:#ff6f91;
+  --accent2:#ff9a76;
+  --key:#ffe066;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:'Mangal',sans-serif;
+  background:linear-gradient(120deg,var(--bg1),var(--bg2));
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:18px;
+  color:#222;
+}
+header{
+  width:100%;
+  max-width:1100px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+h1{
+  margin:6px 0;
+  color:#8b1744;
+  text-shadow:1px 1px #fff;
+  font-size:20px;
+}
+.container{
+  width:100%;
+  max-width:1100px;
+  background:var(--card);
+  border-radius:14px;
+  padding:16px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.08);
+  margin-top:12px;
+  display:flex;
+  flex-direction:column;
+}
+.top-row{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.left,.right{
+  flex:1;
+  min-width:260px;
+  display:flex;
+  flex-direction:column;
+}
+.display-controls-wrapper{
+  position:sticky;
+  top:0;
+  background:var(--card);
+  z-index:10;
+  padding-bottom:10px;
+}
+.scroll-board{
+  overflow-y:auto;
+  max-height:60vh;
+  padding-top:10px;
+}
+.display{
+  background-color: #444;
+  color:white;
+  padding:20px;
+  text-align:center;
+  font-size:50px;
+  min-height:150px;
+  width:100%;
+  box-shadow:0 6px 16px rgba(0,0,0,0.04);
+  margin-bottom:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  word-break:break-word;
+  border-radius: 20px;
+  margin-top: 10px;
+}
+.vowel-list{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:8px;
+}
+.combined-vowel{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  background:#f2884a;
+  border-radius:10px;
+  padding:8px 12px;
+  box-shadow:0 4px 8px rgba(0,0,0,0.1);
+  cursor:pointer;
+  width:60px;
+  user-select:none;
+}
+.big-vowel{
+  font-size:26px;
+  font-weight:700;
+  margin-bottom:4px;
+}
+.small-maatra{
+  font-size:22px;
+  font-weight:600;
+  background:#ffe0e0;
+  padding:2px 6px;
+  border-radius:6px;
+  margin-top:2px;
+}
+.board{
+  display:grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap:10px;
+  margin-top:10px;
+}
+.key{
+  background:var(--key);
+  border-radius:10px;
+  padding:14px;
+  text-align:center;
+  font-size:20px;
+  cursor:pointer;
+  box-shadow:0 6px 12px rgba(0,0,0,0.08);
+  transition:transform .12s,background .12s;
+  user-select:none;
+}
+.key:hover{
+  transform:scale(1.04);
+  background:var(--accent2);
+  color:#fff;
+}
+.special{background:var(--accent);color:#fff}
+.controls{
+  display:flex;
+  gap:10px;
+  margin-top:10px;
+  flex-wrap:wrap;
+}
+.btn{
+  padding:8px 12px;
+  border-radius:8px;
+  cursor:pointer;
+  border:none;
+  font-weight:600;
+  background:#f0f0f0;
+}
+footer{
+  width:100%;
+  max-width:1100px;
+  text-align:center;
+  margin-top:18px;
+  color:#444;
+  opacity:0.9;
+  font-size:14px;
+}
+@media (max-width:760px){
+  .board{grid-template-columns:repeat(4,1fr)}
+  .top-row{flex-direction:column}
+  .display{font-size:36px;min-height:120px;}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>नेपाली वर्ण माला र शब्द सिकाऔं</h1>
+  <div>
+    <a href="index.html" class="btn" style="background:var(--accent);color:#fff;padding:8px 12px;border-radius:8px;text-decoration:none">Home</a>
+    <a href="practice.html" class="btn" style="background:var(--accent);color:#fff;padding:8px 12px;border-radius:8px;text-decoration:none">Practice</a>
+    
+  </div>
+</header>
+
+<div class="container">
+  <div class="top-row">
+    <div class="left">
+      <div class="display-controls-wrapper">
+        <div id="display" class="display" aria-live="polite"></div>
+        <div class="controls">
+          <button id="btn-chandra" class="btn">ँ</button>
+          <button id="btn-halant" class="btn">्</button>
+          <button id="btn-purna" class="btn">।</button>
+          <button id="btn-qsn" class="btn">?</button>
+          <button id="btn-comma" class="btn">,</button>
+          <button id="btn-excla" class="btn">!</button>
+          <button id="btn-doubleqote" class="btn">"</button>
+          <button id="btn-semicol" class="btn">;</button>
+          <button id="btn-single" class="btn">'</button>
+          <button id="btn-space" class="btn">Space</button>
+          <button id="btn-del" class="btn">&#8592;</button>
+          <button id="btn-clear" class="btn">C</button>
+          
+          <button id="btn-eq" class="btn" style="background:#8bd3a8">=</button>
+          <button id="btn-save" class="btn" style="background:#ffd166">Save</button>
+          <button id="btn-load" class="btn" style="background:#a0c4ff">Load</button>
+        </div>
+      </div>
+      <div class="scroll-board">
+        <div class="vowel-list" id="vowelList"></div>
+        <div id="board" class="board"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>© 2025 Sanskash Digital — बच्चाहरुका लागि सरल र रमाइलो तरीका</footer>
+
+<script>
+const consonants=['क','ख','ग','घ','ङ','च','छ','ज','झ','ञ','ट','ठ','ड','ढ','ण','त','थ','द','ध','न','प','फ','ब','भ','म','य','र','ल','व','श','ष','स','ह','क्ष','त्र','ज्ञ'];
+const vowels = ['अ','आ','इ','ई','उ','ऊ','ऋ','ए','ऐ','ओ','औ','अं','अः'];
+const maatraMap = {'अ':'','आ':'ा','इ':'ि','ई':'ी','उ':'ु','ऊ':'ू','ऋ':'ृ','ए':'े','ऐ':'ै','ओ':'ो','औ':'ौ','अं':'ं','अः':'ः'};
+const maatraToSpeak = {'ा':'आ','ि':'इ','ी':'ई','ु':'उ','ू':'ऊ','े':'ए','ै':'ऐ','ो':'ओ','ौ':'औ','ं':'अनुस्वार','ँ':'चन्द्रबिन्दु','ः':'विसर्जन'};
+
+// compound consonants
+const compoundConsonants = ['क्ष','त्र','ज्ञ'];
+
+/* render consonants */
+const board = document.getElementById('board');
+consonants.forEach(ch=>{
+  const el = document.createElement('div');
+  el.className='key consonant';
+  el.textContent=ch;
+  board.appendChild(el);
+});
+
+/* render combined vowels */
+const vowelList = document.getElementById('vowelList');
+vowels.forEach(v=>{
+  const box = document.createElement('div');
+  box.className='combined-vowel';
+  const big = document.createElement('div'); big.className='big-vowel'; big.textContent=v;
+  const small = document.createElement('div'); small.className='small-maatra'; small.textContent=maatraMap[v] || '';
+  box.appendChild(big); box.appendChild(small);
+  vowelList.appendChild(box);
+});
+
+/* audio + speech */
+let audioCtx=null;
+function ensureAudio(){if(!audioCtx){audioCtx=new(window.AudioContext||window.webkitAudioContext)();}}
+function playClick(freq=360,type='sine',len=0.06){try{ensureAudio();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=type;o.frequency.value=freq;g.gain.value=0.08;o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+len);}catch(e){}}
+function speakNepali(txt){
+  if(!('speechSynthesis' in window)) return;
+  const u=new SpeechSynthesisUtterance(txt);
+  u.lang='ne-NP';
+  u.rate=0.95;
+  u.pitch=1;
+  const voices=speechSynthesis.getVoices();
+  let v=voices.find(v=>v.lang.startsWith('ne')) || voices.find(v=>v.lang.startsWith('hi'));
+  if(v) u.voice=v;
+  speechSynthesis.speak(u);
+}
+
+/* display */
+const display=document.getElementById('display');
+let lastConsonant='';
+
+function handleCharacterInput(char,type){
+  if(type==='consonant'){
+    playClick(360,'square');
+    display.textContent+=char;
+    lastConsonant=char;
+    speakNepali(char);
+  }
+  if(type==='vowel'){
+    playClick(420,'sine');
+    display.textContent+=char;
+    lastConsonant='';
+    speakNepali(char);
+  }
+  if(type==='maatra'){
+    playClick(520,'sine');
+    let text = display.textContent;
+
+    // check for compound consonant at end
+    let toReplace='';
+    for(let comp of compoundConsonants){
+      if(text.endsWith(comp)){
+        toReplace = comp;
+        break;
+      }
+    }
+
+    if(toReplace){
+      display.textContent = text.slice(0,-toReplace.length) + toReplace + char;
+    } else if(lastConsonant){
+      display.textContent = text.slice(0,-1) + lastConsonant + char;
+    } else {
+      display.textContent += char;
+    }
+
+    lastConsonant='';
+    speakNepali(maatraToSpeak[char]||char);
+  }
+}
+
+/* click listener */
+document.body.addEventListener('click',ev=>{
+  const t=ev.target;
+  if(t.classList.contains('consonant')) handleCharacterInput(t.textContent.trim(),'consonant');
+  else if(t.classList.contains('big-vowel')) handleCharacterInput(t.textContent.trim(),'vowel');
+  else if(t.classList.contains('small-maatra')) handleCharacterInput(t.textContent.trim(),'maatra');
+});
+
+/* controls */
+document.getElementById('btn-chandra').addEventListener('click',()=>{playClick(460,'triangle');display.textContent+='ँ';lastConsonant='';speakNepali('चन्द्रबिन्दु');});
+document.getElementById('btn-del').addEventListener('click',()=>{playClick(260,'square');display.textContent=display.textContent.slice(0,-1);lastConsonant='';});
+document.getElementById('btn-clear').addEventListener('click',()=>{playClick(260,'sawtooth');display.textContent='';lastConsonant='';});
+document.getElementById('btn-halant').addEventListener('click',()=>{playClick(460,'triangle');display.textContent+='्';lastConsonant='';speakNepali('हलन्त');});
+document.getElementById('btn-space').addEventListener('click',()=>{playClick(200);display.textContent+=' ';lastConsonant='';speakNepali('स्पेस');});
+document.getElementById('btn-purna').addEventListener('click',()=>{playClick(300);display.textContent+='।';lastConsonant='';speakNepali('पूर्ण विराम');});
+document.getElementById('btn-qsn').addEventListener('click',()=>{playClick(300);display.textContent+='?';lastConsonant='';speakNepali('प्रश्न चिन्ह');});
+document.getElementById('btn-comma').addEventListener('click',()=>{playClick(300);display.textContent+=',';lastConsonant='';speakNepali('अल्पविराम');});
+document.getElementById('btn-excla').addEventListener('click',()=>{playClick(300);display.textContent+='!';lastConsonant='';speakNepali('विस्मायोधी');});
+document.getElementById('btn-doubleqote').addEventListener('click',()=>{playClick(300);display.textContent+='"';lastConsonant='';speakNepali('उद्धरण चिन्ह');});
+document.getElementById('btn-single').addEventListener('click',()=>{playClick(300);display.textContent+=' \'';lastConsonant='';speakNepali('एकल उद्धरण');});
+document.getElementById('btn-semicol').addEventListener('click',()=>{playClick(300);display.textContent+=' ;';lastConsonant='';speakNepali('अर्धविराम');});
+document.getElementById('btn-eq').addEventListener('click',()=>{
+  const res=display.textContent.trim();
+  if(res){
+    playClick(760,'sine');
+    confetti({particleCount:20,spread:50,origin:{y:0.6}});
+    const hist=JSON.parse(localStorage.getItem('nepali_hist')||'[]');
+    hist.push(res);
+    localStorage.setItem('nepali_hist',JSON.stringify(hist));
+    display.style.background='linear-gradient(90deg,#fff,#f0fff4)';
+    setTimeout(()=>display.style.background='',350);
+    speakNepali('सेभ गरियो: '+res);
+  } else{
+    playClick(160,'sawtooth');
+    speakNepali('खाली छ');
+  }
+});
+document.getElementById('btn-save').addEventListener('click',()=>{localStorage.setItem('nepali_display',display.textContent);playClick(600,'sine');speakNepali('सेभ गरियो');});
+document.getElementById('btn-load').addEventListener('click',()=>{display.textContent=localStorage.getItem('nepali_display')||'';playClick(420,'sine');speakNepali('लोड गरियो');lastConsonant='';});
+</script>
+</body>
+</html>

@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="ne">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>नेपाली शब्द अभ्यास — Single Page</title>
+<style>
+:root{
+  --bg1:#fff4f6;
+  --bg2:#e8f6ff;
+  --card:#ffffff;
+  --accent:#ff6f91;
+  --accent2:#ff9a76;
+  --key:#ffd54a;
+  --muted:#666;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:'Mangal',sans-serif;background:linear-gradient(135deg,var(--bg1),var(--bg2));-webkit-font-smoothing:antialiased}
+.container{max-width:920px;margin:18px auto;padding:14px;background:var(--card);border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,0.08);display:flex;flex-direction:column;gap:12px}
+.header{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.title{color:var(--accent);font-size:20px;font-weight:700;text-align:center;}
+.top-row{display:flex;flex-direction:column;gap:8px}
+.word-bar{background:#0b0b0b;color:#00ffe0;padding:12px;border-radius:10px;font-size:26px;text-align:center;position:sticky;top:10px;z-index:5}
+.counters{display:flex;gap:10px;justify-content:center;color:var(--muted);font-weight:700}
+.output{background:#fffbea;border:2px solid #ffd6a5;border-radius:10px;min-height:60px;display:flex;align-items:center;justify-content:center;font-size:28px;padding:8px;overflow-x:auto}
+.controls{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.btn{padding:8px 12px;border-radius:10px;border:0;background:#a0c4ff;color:#000;font-weight:700;cursor:pointer}
+.btn.secondary{background:#ffd1dc}
+.status{height:30px;text-align:center;font-weight:700;font-size:18px;transition:opacity .25s}
+.keyboard-wrap{max-height:44vh;overflow-y:auto;padding:8px;border-radius:10px;background:linear-gradient(180deg,#fff,#fff8);}
+.vowel-grid, .cons-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(60px,1fr));gap:8px}
+.key, .vowel-btn{background:var(--key);border-radius:10px;padding:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;user-select:none;font-weight:700;transition:transform .12s;margin-bottom: 15px;}
+.key:hover, .vowel-btn:hover{transform:scale(1.05);background:var(--accent2);}
+.vowel-btn .big{font-size:22px}
+.vowel-btn .small{font-size:18px;margin-top:4px;background:#fff7f0;padding:3px 6px;border-radius:6px}
+.footer{font-size:13px;color:var(--muted);text-align:center;padding-top:6px}
+@media(max-width:720px){
+  .word-bar{font-size:20px}
+  .output{font-size:22px}
+  .vowel-btn .big{font-size:20px}
+  .key{padding:10px;font-size:18px}
+}
+</style>
+</head>
+<body>
+
+<div class="container" role="application" aria-label="Nepali word practice">
+  <div class="header">
+    <div class="title">नेपाली शब्द अभ्यास</div>
+    <div>
+      <a href="index.html" class="btn" style="background:var(--accent);color:#fff;padding:8px 12px;border-radius:8px;text-decoration:none">Home</a>
+    <!-- <a href="practice.html" class="btn" style="background:var(--accent);color:#fff;padding:8px 12px;border-radius:8px;text-decoration:none">शब्द अभ्यास</a> -->
+    
+    <a href="varnamala.html" class="btn" style="background:var(--accent);color:#fff;padding:8px 12px;border-radius:8px;text-decoration:none">वर्णमाला</a>
+  </div>
+    <!-- <div style="color:var(--muted);font-size:13px">Touch / Click गरि अक्षर बनी शब्द लेख्ने</div> -->
+  </div>
+
+  <!-- TOP / FREEZED WORD -->
+  <div class="top-row">
+    <div class="word-bar">शब्द: <span id="targetWord">काका</span></div>
+    <div class="counters">
+      <div>सही: <span id="correctCount">0</span></div>
+      <div>गलत: <span id="wrongCount">0</span></div>
+      <div>जम्मा: <span id="totalCount">0</span></div>
+    </div>
+  </div>
+
+  <!-- TYPING OUTPUT (freeze - readonly) -->
+  <div id="output" class="output" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- buttons -->
+  <div class="controls" aria-hidden="false">
+    <button class="btn" id="checkBtn">Check ✔</button>
+    <button class="btn secondary" id="skipBtn">Skip ⤼</button>
+    <button class="btn secondary" id="resetBtn">Reset ↺</button>
+    <button class="btn secondary" id="delBtn">Delete ←</button>
+    <button class="btn secondary" id="chandraBtn">ँ</button>
+    <button class="btn secondary" id="halantBtn">्</button>
+  </div>
+
+  <!-- status message -->
+  <div id="status" class="status" aria-live="polite"></div>
+
+  <!-- keyboard area (only this scrolls) -->
+  <div class="keyboard-wrap" role="region" aria-label="keyboard area">
+    <!-- <div style="margin-bottom:8px;font-weight:700;color:var(--muted)">Vowels (माथि vowel — तल matra — क्लिक फरक काम)</div> -->
+    <div id="vowelGrid" class="vowel-grid" ></div>
+
+    <!-- <div style="margin-top:12px;margin-bottom:8px;font-weight:700;color:var(--muted)">Consonants</div> -->
+    <div id="consGrid" class="cons-grid" ></div>
+  </div>
+
+  <div class="footer">© 2025 Sanskash Digital — अभ्यास जारी राख्नुहोस्</div>
+</div>
+
+<script>
+/* --- data --- */
+const consonants = ['क','ख','ग','घ','ङ','च','छ','ज','झ','ञ','ट','ठ','ड','ढ','ण','त','थ','द','ध','न','प','फ','ब','भ','म','य','र','ल','व','श','ष','स','ह','क्ष','त्र','ज्ञ'];
+const vowels = ['अ','आ','इ','ई','उ','ऊ','ऋ','ए','ऐ','ओ','औ','अं','अः']; //13
+const maatraMap = {'अ':'','आ':'ा','इ':'ि','ई':'ी','उ':'ु','ऊ':'ू','ऋ':'ृ','ए':'े','ऐ':'ै','ओ':'ो','औ':'ौ','अं':'ं','अः':'ः'};
+const compoundConsonants = ['क्ष','त्र','ज्ञ'];
+
+const words = [
+"काका","मामा","जामा","आमा","बाबा","गमला","थाल","लामो","माला","नानी",
+"कलम","कापी","झोला","रोटी","दाल","भात","पाठ","किरा","काग","कुकुर",
+"चरा","बिरालो","आगो","पानी","काला","दाना","घर","माथि","तल","फूल",
+"साया","झापा","निलो","रातो","हरियो","कुरा","दिदी","भाइ","दाइ","नौलो",
+"थोरै","धेरै","राम्रा","नानी","किरा","साना","ठूलो","झोला","माला","भरोसा"
+]; //50
+
+/* --- state --- */
+let currentIndex = 0;
+let correct = 0, wrong = 0, total = 0;
+let lastConsonant = '';
+
+/* --- elements --- */
+const targetEl = document.getElementById('targetWord');
+const outputEl = document.getElementById('output');
+const statusEl = document.getElementById('status');
+const correctEl = document.getElementById('correctCount');
+const wrongEl = document.getElementById('wrongCount');
+const totalEl = document.getElementById('totalCount');
+
+/* --- helpers --- */
+function setTarget(i){
+  currentIndex = (i % words.length + words.length) % words.length;
+  targetEl.textContent = words[currentIndex];
+  outputEl.textContent = '';
+  statusEl.textContent = '';
+  lastConsonant = '';
+}
+function updateCounts(){ correctEl.textContent = correct; wrongEl.textContent = wrong; totalEl.textContent = total; }
+function showStatus(msg, color='black', duration=2000){
+  statusEl.style.color = color; statusEl.textContent = msg;
+  if(duration>0){
+    clearTimeout(statusEl._timeout);
+    statusEl._timeout = setTimeout(()=>{ statusEl.textContent=''; }, duration);
+  }
+}
+/* compound handling for matra insertion */
+function insertMatraToText(text, matra){
+  if(!matra) return text + matra;
+  // if text ends with a compound consonant, attach matra after compound (preserve)
+  for(let c of compoundConsonants){
+    if(text.endsWith(c)) return text.slice(0,-c.length) + c + matra;
+  }
+  // if last character is consonant, replace last with consonant+matra (so that we get क + ा instead of का as separate)
+  if(lastConsonant && text.endsWith(lastConsonant)){
+    return text.slice(0,-1) + lastConsonant + matra;
+  }
+  return text + matra;
+}
+
+/* --- keyboard rendering --- */
+const vGrid = document.getElementById('vowelGrid');
+vowels.forEach(v=>{
+  const btn = document.createElement('div');
+  btn.className = 'vowel-btn';
+  btn.innerHTML = `<div class="big">${v}</div><div class="small">${maatraMap[v]||''}</div>`;
+  // click handling: if click on small matra area -> add matra; else add vowel
+  btn.addEventListener('click', (e)=>{
+    const rect = btn.getBoundingClientRect();
+    // detect click position: if clicked lower 40% treat as matra click (works for touch too)
+    const relY = (e.clientY || (e.touches && e.touches[0].clientY) || 0) - rect.top;
+    if(relY > rect.height * 0.45 && maatraMap[v]) {
+      // insert matra
+      outputEl.textContent = insertMatraToText(outputEl.textContent, maatraMap[v]);
+      lastConsonant = '';
+    } else {
+      // vowel
+      outputEl.textContent += v;
+      lastConsonant = '';
+    }
+  });
+  vGrid.appendChild(btn);
+});
+
+const cGrid = document.getElementById('consGrid');
+consonants.forEach(c=>{
+  const btn = document.createElement('div');
+  btn.className = 'key';
+  btn.textContent = c;
+  btn.addEventListener('click', ()=> {
+    outputEl.textContent += c;
+    lastConsonant = c;
+  });
+  cGrid.appendChild(btn);
+});
+
+/* --- controls --- */
+document.getElementById('checkBtn').addEventListener('click', ()=>{
+  const typed = outputEl.textContent.trim();
+  const target = words[currentIndex];
+  total++;
+  if(typed === target){
+    correct++;
+    showStatus('✔ सही!', 'green', 2200);
+    // celebration
+    try{ confetti({particleCount:25, spread:60, origin:{y:0.6}}); }catch(e){}
+    currentIndex = (currentIndex + 1) % words.length;
+    setTimeout(()=> setTarget(currentIndex), 700);
+  } else {
+    wrong++;
+    showStatus('✖ मिलेन! फेरि प्रयास', 'red', 2200);
+  }
+  updateCounts();
+});
+
+document.getElementById('skipBtn').addEventListener('click', ()=>{
+  currentIndex = (currentIndex + 1) % words.length; setTarget(currentIndex);
+});
+
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  outputEl.textContent = ''; showStatus('रिसेट गरियो', '#333', 1500);
+});
+
+document.getElementById('delBtn').addEventListener('click', ()=>{
+  let s = outputEl.textContent;
+  if(!s) return;
+  // remove last unicode grapheme (approx): use slice(-1) is OK for Nepali simple chars
+  outputEl.textContent = s.slice(0, -1);
+  // recompute lastConsonant: if new last char is consonant set it, else clear
+  const last = outputEl.textContent.slice(-2) || outputEl.textContent.slice(-1) || '';
+  lastConsonant = consonants.includes(last) ? last : (consonants.includes(outputEl.textContent.slice(-1))? outputEl.textContent.slice(-1):'');
+});
+
+document.getElementById('chandraBtn').addEventListener('click', ()=> {
+  outputEl.textContent += 'ँ'; lastConsonant = '';
+});
+document.getElementById('halantBtn').addEventListener('click', ()=> {
+  outputEl.textContent += '्'; lastConsonant = '';
+});
+
+/* init */
+setTarget(0);
+updateCounts();
+
+/* keyboard: allow hardware keyboard typing (optional) */
+window.addEventListener('keydown', (e)=>{
+  // disallow default to keep focus, only handle backspace and enter
+  if(e.key === 'Backspace'){ e.preventDefault(); document.getElementById('delBtn').click(); }
+  if(e.key === 'Enter'){ e.preventDefault(); document.getElementById('checkBtn').click(); }
+});
+</script>
+</body>
+</html>

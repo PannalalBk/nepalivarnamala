@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Section</title>
+    <style>
+        /* --- Basic Reset --- */
+        * {margin: 0; padding: 0; box-sizing: border-box; font-family: 'Mangal', sans-serif;}
+        body {
+            background: linear-gradient(135deg, #ffecd2, #fcb69f);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            padding-bottom: 60px; /* Footer space */
+        }
+
+        h1 {
+            font-size: 3rem;
+            color: #ff6f91;
+            text-align: center;
+            animation: fadeInDown 1s ease forwards;
+        }
+
+        h4 {
+            font-size: 1.5rem;
+            color: #333;
+            margin: 10px 0;
+            text-align: center;
+            animation: fadeInUp 1s ease forwards;
+        }
+
+        /* --- Container --- */
+        .container {
+            display: flex;
+            gap: 40px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* --- Card Styles --- */
+        .container div {
+            background: #fff;
+            padding: 30px 50px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .container div:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.25);
+        }
+
+        .container a {
+            text-decoration: none;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #ff6f91;
+            transition: color 0.3s;
+        }
+
+        .container a:hover {
+            color: #ff3d6b;
+        }
+
+        /* --- Footer --- */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            padding: 10px 0;
+            background: rgba(255, 255, 255, 0.85);
+            color: #666;
+            font-size: 14px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* --- Animations --- */
+        @keyframes fadeInDown {
+            0% {opacity: 0; transform: translateY(-30px);}
+            100% {opacity: 1; transform: translateY(0);}
+        }
+
+        @keyframes fadeInUp {
+            0% {opacity: 0; transform: translateY(30px);}
+            100% {opacity: 1; transform: translateY(0);}
+        }
+
+        /* --- Responsive --- */
+        @media(max-width: 600px){
+            .container {
+                flex-direction: column;
+                gap: 20px;
+            }
+            .container div {
+                padding: 20px 30px;
+            }
+            h1 {font-size: 2.2rem;}
+            h4 {font-size: 1.2rem;}
+        }
+    </style>
+</head>
+<body>
+    <h1>Hello Kids!</h1>
+    <h4>What do you want to learn??</h4>
+    <h4>आउनुहोस् खेल्दै सिकौं</h4>
+
+    <div class="container">
+        <div class="kakha"> 
+            <a href="varnamala.html">क ख सिक्नुहोस्</a>
+        </div>
+        <div class="practice">
+            <a href="practice.html">शब्द लेख्न सिक्नुहोस्</a>
+        </div>
+    </div>
+
+    <div class="footer">© 2025 Sanskash Digital — अभ्यास जारी राख्नुहोस्</div>
+</body>
+</html>
