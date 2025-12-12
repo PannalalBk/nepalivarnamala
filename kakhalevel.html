@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+  <meta charset="UTF-8">
+  <title>Nepali Varnamala Game</title>
+</head>
+<body>
+    <style>
+        body {
+  font-family: sans-serif;
+  background: #f7f1ff;
+  text-align: center;
+  padding-top: 30px;
+}
+
+#game-box {
+  width: 320px;
+  margin: auto;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+#question {
+  font-size: 4rem;
+  margin: 20px 0;
+}
+
+.option-btn {
+  padding: 10px 20px;
+  font-size: 1.5rem;
+  margin: 5px;
+  cursor: pointer;
+  background: #eae2ff;
+  border: none;
+  border-radius: 8px;
+  transition: 0.2s;
+}
+
+.option-btn:hover {
+  background: #d5c5ff;
+}
+    </style>
+
+<h1>नेपाली वर्णमाला – लेभल गेम</h1>
+
+<div id="game-box">
+  <h2 id="level-title">Level 1</h2>
+  <div id="question"></div>
+
+  <div id="options"></div>
+
+  <h3 id="score">Correct: 0 / 10</h3>
+  <h3 id="tries">Try: 0 / 3</h3>
+</div>
+
+<script>
+// ------------------------------
+//   LEVEL DATA
+// ------------------------------
+const levels = [
+  ["क", "ख", "ग", "घ", "ङ"],
+  ["च", "छ", "ज", "झ", "ञ"],
+  ["ट", "ठ", "ड", "ढ", "ण"],
+  ["त", "थ", "द", "ध", "न"],
+  ["प", "फ", "ब", "भ", "म"],
+  ["य", "र", "ल", "व"],
+  ["श", "ष", "स", "ह", "क्ष", "त्र", "ज्ञ"]
+];
+
+let currentLevel = 0;
+let correctNeeded = 10;   // ⭐ Level change after 10 correct
+let score = 0;
+
+let currentCorrectLetter = "";
+let tryCount = 0;
+
+// DOM elements
+const levelTitle = document.getElementById("level-title");
+const questionBox = document.getElementById("question");
+const optionsBox = document.getElementById("options");
+const scoreBox = document.getElementById("score");
+const triesBox = document.getElementById("tries");
+
+// ------------------------------
+//   VOICE FUNCTION
+// ------------------------------
+function speak(text) {
+  const msg = new SpeechSynthesisUtterance();
+  msg.text = text;
+  msg.lang = "ne-NP";
+  msg.rate = 0.8;
+  window.speechSynthesis.speak(msg);
+}
+
+// ------------------------------
+//   GAME START
+// ------------------------------
+loadLevel();
+
+function loadLevel() {
+  score = 0;
+  scoreBox.textContent = `Correct: 0 / ${correctNeeded}`;
+  levelTitle.textContent = `Level ${currentLevel + 1}`;
+  createQuestion();
+}
+
+// ------------------------------
+//   CREATE QUESTION
+// ------------------------------
+function createQuestion() {
+  optionsBox.innerHTML = "";
+  tryCount = 0;
+  triesBox.textContent = `Try: 0 / 3`;
+
+  let letters = levels[currentLevel];
+  currentCorrectLetter = letters[Math.floor(Math.random() * letters.length)];
+
+  questionBox.textContent = currentCorrectLetter;
+  speak(currentCorrectLetter);
+
+  letters.forEach(letter => {
+    let btn = document.createElement("button");
+    btn.className = "option-btn";
+    btn.textContent = letter;
+
+    btn.onclick = () => {
+      speak(letter);
+      speak(currentCorrectLetter); 
+      checkAnswer(letter);
+    };
+
+    optionsBox.appendChild(btn);
+  });
+}
+
+// ------------------------------
+//   CHECK ANSWER (WITH 3 TRY LIMIT)
+// ------------------------------
+function checkAnswer(selected) {
+
+  if (selected === currentCorrectLetter) {
+    score++;
+    scoreBox.textContent = `Correct: ${score} / ${correctNeeded}`;
+
+    // ⭐⭐ LEVEL CHANGE LOGIC (10 correct)
+    if (score >= correctNeeded) {
+      nextLevel();
+      return;
+    }
+
+    createQuestion();
+    return;
+  }
+
+  tryCount++;
+  triesBox.textContent = `Try: ${tryCount} / 3`;
+
+  if (tryCount >= 3) {
+    createQuestion();
+  }
+}
+
+// ------------------------------
+//   NEXT LEVEL
+// ------------------------------
+function nextLevel() {
+  currentLevel++;
+
+  if (currentLevel >= levels.length) {
+    alert("Great job! You completed all levels!");
+    currentLevel = 0;
+  } else {
+    alert("Level Complete! Next Level Starting...");
+  }
+
+  loadLevel();
+}
+</script>
+</body>
+</html>
