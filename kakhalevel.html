@@ -2,195 +2,881 @@
 <html lang="ne">
 <head>
   <meta charset="UTF-8">
-  <title>Nepali Varnamala Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>नेपाली वर्णमाला – लेभल गेम</title>
+  <style>
+    :root{
+      --bg1:#f7f1ff;
+      --bg2:#e8f6ff;
+      --card:#ffffff;
+      --accent:#b14474;
+      --accent2:#ff9a76;
+      --key:#eae2ff;
+      --muted:#666;
+      --success:#2ecc71;
+      --warning:#f39c12;
+      --info:#3498db;
+    }
+    *{box-sizing:border-box}
+    html,body{
+      height:100%;margin:0;
+      font-family:'Mangal', sans-serif;
+      background:linear-gradient(135deg,var(--bg1),var(--bg2));
+    }
+    .container{
+      max-width:920px;margin:18px auto;padding:14px;
+      background:var(--card);border-radius:14px;
+      box-shadow:0 8px 30px rgba(0,0,0,0.08);
+      display:flex;flex-direction:column;gap:12px;
+      position:relative;
+    }
+    .header{display:flex;justify-content:space-between;align-items:center}
+    .title{color:var(--accent);font-size:20px;font-weight:700}
+    
+    /* Level Indicator */
+    .level-indicator {
+      background: linear-gradient(135deg, var(--info), #8e44ad);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: bold;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+    }
+    .level-indicator::before {
+      content: "🎯";
+    }
+    
+    /* Sound Controls */
+    .sound-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 8px;
+    }
+    
+    .sound-btn {
+      background: linear-gradient(135deg, #00b09b, #96c93d);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 20px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .sound-btn.speak-question {
+      background: linear-gradient(135deg, #3498db, #2980b9);
+    }
+    
+    .sound-btn.speak-answer {
+      background: linear-gradient(135deg, #9b59b6, #8e44ad);
+    }
+    
+    .sound-btn:disabled {
+      background: #bdc3c7;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .sound-status {
+      font-size: 14px;
+      color: var(--muted);
+      margin-left: 5px;
+    }
+    
+    /* Question Display */
+    .question-bar{
+      background:#0b0b0b;color:#00ffe0;
+      padding:20px;border-radius:10px;
+      font-size:4rem;text-align:center;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:20px;
+      margin:10px 0;
+    }
+    .question-bar .speak-icon {
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      padding: 12px;
+      font-size: 24px;
+      transition: all 0.2s ease;
+    }
+    .question-bar .speak-icon:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.1);
+    }
+    
+    /* Counters */
+    .counters{
+      display:flex;
+      gap:14px;
+      justify-content:center;
+      font-weight:700;
+      color:var(--muted);
+      background:#f8f9fa;
+      padding:12px;
+      border-radius:10px;
+    }
+    
+    /* Options Grid */
+    .options-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(80px, 1fr));
+      gap:12px;
+      padding:15px;
+      background:linear-gradient(180deg,#fff,#fff8);
+      border-radius:10px;
+      margin:10px 0;
+    }
+    
+    .option-btn{
+      background:var(--key);
+      border:2px solid #d5c5ff;
+      border-radius:10px;
+      padding:20px 10px;
+      font-size:2rem;
+      cursor:pointer;
+      transition:all 0.2s ease;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:80px;
+    }
+    
+    .option-btn:hover{
+      transform:translateY(-3px);
+      background:#d5c5ff;
+      box-shadow:0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .option-btn.correct{
+      background:var(--success);
+      color:white;
+      border-color:var(--success);
+      animation:pulse 0.5s;
+    }
+    
+    .option-btn.wrong{
+      background:#e74c3c;
+      color:white;
+      border-color:#e74c3c;
+    }
+    
+    /* Controls */
+    .controls{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      justify-content:center;
+      margin:10px 0;
+    }
+    
+    .btn{
+      padding:10px 20px;
+      border-radius:10px;
+      border:0;
+      font-weight:700;
+      cursor:pointer;
+      background:var(--accent);
+      color:white;
+      transition:all 0.2s ease;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      min-height:44px;
+    }
+    
+    .btn:hover{
+      transform:translateY(-2px);
+      box-shadow:0 4px 12px rgba(177, 68, 116, 0.3);
+    }
+    
+    .btn.secondary{
+      background:#eae2ff;
+      color:#333;
+    }
+    
+    .btn.sound{
+      background:linear-gradient(135deg, #9b59b6, #8e44ad);
+    }
+    
+    .btn.skip{
+      background:#f39c12;
+    }
+    
+    .btn.home{
+      background:linear-gradient(135deg, #3498db, #2980b9);
+    }
+    
+    .status{
+      text-align:center;
+      font-weight:700;
+      font-size:18px;
+      height:28px;
+      padding:5px;
+      margin:5px 0;
+    }
+    
+    .footer{
+      text-align:center;
+      font-size:13px;
+      color:var(--muted);
+      padding:15px 0 5px;
+      margin-top:auto;
+    }
+    
+    /* Speaking Animation */
+    .speaking {
+      animation: pulseSpeaking 0.8s infinite;
+    }
+    
+    @keyframes pulseSpeaking {
+      0%, 100% { 
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7);
+      }
+      50% { 
+        transform: scale(1.05);
+        box-shadow: 0 0 0 10px rgba(52, 152, 219, 0);
+      }
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    
+    /* Congratulations Modal */
+    .modal-overlay {
+      position:fixed;
+      top:0;left:0;right:0;bottom:0;
+      background:rgba(0,0,0,0.8);
+      display:none;
+      justify-content:center;
+      align-items:center;
+      z-index:1000;
+      backdrop-filter:blur(5px);
+      padding:20px;
+    }
+    
+    .congrats-modal {
+      background:linear-gradient(135deg,#ff9a9e,#fad0c4);
+      padding:40px 30px;
+      border-radius:20px;
+      text-align:center;
+      max-width:500px;
+      width:100%;
+      box-shadow:0 20px 40px rgba(0,0,0,0.3);
+      animation:modalSlideIn 0.5s ease-out;
+      border:8px solid #fff;
+      position:relative;
+      overflow:hidden;
+    }
+    
+    .congrats-modal::before {
+      content:"";
+      position:absolute;
+      top:-50%;left:-50%;
+      width:200%;height:200%;
+      background:linear-gradient(45deg,transparent,rgba(255,255,255,0.1),transparent);
+      transform:rotate(45deg);
+      animation:shimmer 3s infinite;
+    }
+    
+    .congrats-modal h2 {
+      color:#d63031;
+      font-size:32px;
+      margin:0 0 20px;
+      text-shadow:2px 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .congrats-modal p {
+      font-size:20px;
+      color:#333;
+      margin:15px 0;
+      line-height:1.5;
+    }
+    
+    .congrats-modal .level-badge {
+      display:inline-block;
+      background:linear-gradient(135deg,#ff7675,#fd79a8);
+      color:white;
+      padding:10px 25px;
+      border-radius:50px;
+      font-size:24px;
+      font-weight:bold;
+      margin:20px auto;
+      box-shadow:0 10px 20px rgba(255,118,117,0.3);
+      animation:bounce 1s infinite alternate;
+    }
+    
+    .congrats-modal .stars {
+      font-size:40px;
+      color:#FFD700;
+      margin:20px 0;
+      animation:twinkle 1.5s infinite;
+    }
+    
+    .congrats-modal .modal-buttons {
+      display:flex;
+      gap:15px;
+      justify-content:center;
+      margin-top:30px;
+    }
+    
+    .modal-btn {
+      padding:12px 25px;
+      border:none;
+      border-radius:10px;
+      font-size:16px;
+      font-weight:bold;
+      cursor:pointer;
+      transition:all 0.3s ease;
+    }
+    
+    .modal-btn.continue {
+      background:linear-gradient(135deg,#00b09b,#96c93d);
+      color:white;
+    }
+    
+    .modal-btn.restart {
+      background:linear-gradient(135deg,#ff416c,#ff4b2b);
+      color:white;
+    }
+    
+    .modal-btn.home {
+      background:linear-gradient(135deg,#3498db,#2980b9);
+      color:white;
+    }
+    
+    .modal-btn:hover {
+      transform:scale(1.05);
+      box-shadow:0 8px 20px rgba(0,0,0,0.2);
+    }
+    
+    /* All Levels Complete Modal */
+    .all-complete-modal {
+      background:linear-gradient(135deg,#ff9a9e,#fad0c4,#a1c4fd);
+      padding:50px 30px;
+    }
+    
+    .all-complete-modal .trophy {
+      font-size:60px;
+      margin:0 0 20px;
+      animation:rotate 3s infinite linear;
+    }
+    
+    .all-complete-modal h2 {
+      font-size:36px;
+      color:#e84393;
+    }
+    
+    /* Animations */
+    @keyframes modalSlideIn {
+      from {
+        opacity:0;
+        transform:translateY(-50px) scale(0.9);
+      }
+      to {
+        opacity:1;
+        transform:translateY(0) scale(1);
+      }
+    }
+    
+    @keyframes bounce {
+      from { transform:translateY(0); }
+      to { transform:translateY(-10px); }
+    }
+    
+    @keyframes twinkle {
+      0%, 100% { opacity:1; }
+      50% { opacity:0.5; }
+    }
+    
+    @keyframes shimmer {
+      0% { transform:translateX(-100%) rotate(45deg); }
+      100% { transform:translateX(100%) rotate(45deg); }
+    }
+    
+    @keyframes rotate {
+      from { transform:rotate(0deg); }
+      to { transform:rotate(360deg); }
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container {
+        margin:10px;
+        padding:12px;
+      }
+      .question-bar {
+        font-size:3rem;
+        padding:15px;
+      }
+      .option-btn {
+        font-size:1.8rem;
+        min-height:70px;
+        padding:15px 8px;
+      }
+      .options-grid {
+        grid-template-columns:repeat(auto-fit, minmax(70px, 1fr));
+        gap:10px;
+      }
+      .congrats-modal {
+        padding:30px 20px;
+      }
+      .congrats-modal h2 {
+        font-size:26px;
+      }
+      .modal-buttons {
+        flex-direction:column;
+      }
+      .modal-btn {
+        padding:15px;
+      }
+      .sound-controls {
+        justify-content:center;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .question-bar {
+        font-size:2.5rem;
+      }
+      .option-btn {
+        font-size:1.5rem;
+        min-height:60px;
+      }
+      .options-grid {
+        grid-template-columns:repeat(4, 1fr);
+        gap:8px;
+      }
+      .controls {
+        grid-template-columns:repeat(3, 1fr);
+      }
+      .btn {
+        padding:8px 12px;
+        font-size:14px;
+      }
+    }
+  </style>
 </head>
 <body>
-    <style>
-        body {
-  font-family: sans-serif;
-  background: #f7f1ff;
-  text-align: center;
-  padding-top: 30px;
-}
-
-#game-box {
-  width: 320px;
-  margin: auto;
-  padding: 20px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-}
-
-#question {
-  font-size: 4rem;
-  margin: 20px 0;
-}
-
-.option-btn {
-  padding: 10px 20px;
-  font-size: 1.5rem;
-  margin: 5px;
-  cursor: pointer;
-  background: #eae2ff;
-  border: none;
-  border-radius: 8px;
-  transition: 0.2s;
-}
-
-.option-btn:hover {
-  background: #d5c5ff;
-}
-.btn{
-    background-color: rgb(177, 68, 116);
-    padding: 8px 12px;
-    border-radius: 8px;
-    text-decoration: none;
-    color: #fff;
-
-}
-    </style>
-    
-
-<h1>नेपाली वर्णमाला – लेभल गेम</h1>
-
-<div id="game-box">
-    <div class="index">
-        <!-- <a href="index.html">Home</a> -->
-         <a href="index.html" class="btn">Home</a>
+<div class="container">
+  <div class="header">
+    <div>
+      <div class="title">नेपाली वर्णमाला – लेभल गेम</div>
+      <div id="currentLevelDisplay" class="level-indicator">Level 1</div>
+      <div class="sound-controls">
+        <button id="speakQuestionBtn" class="sound-btn speak-question" title="Speak displayed letter">🔊</button>
+        <span class="sound-status">Click 🔊 to hear the letter</span>
+      </div>
     </div>
-  <h2 id="level-title">Level 1</h2>
-  <div id="question"></div>
-
-  <div id="options"></div>
-
-  <h3 id="score">Correct: 0 / 10</h3>
-  <h3 id="tries">Try: 0 / 3</h3>
+    <a href="index.html" class="btn home" style="text-decoration:none">🏠 Home</a>
+  </div>
+  
+  <div class="question-bar">
+    <span id="questionLetter"></span>
+    <span id="speakQuestionBtn" class="speak-icon" title="Hear this letter">🔊</span>
+  </div>
+  
+  <div class="counters">
+    <div>सही: <span id="correctCount">0</span> / <span id="correctNeeded">10</span></div>
+    <div>गलत: <span id="wrongCount">0</span></div>
+    <div>प्रयास: <span id="tryCount">0</span> / 3</div>
+  </div>
+  
+  <div id="optionsGrid" class="options-grid"></div>
+  
+  <div class="controls">
+    <button class="btn skip" id="skipBtn">Skip ⤼</button>
+    <button class="btn" id="hintBtn">Hint 💡</button>
+    <button class="btn secondary" id="resetLevelBtn">Reset Level ↺</button>
+    <button class="btn sound" id="autoSpeakBtn" title="Toggle auto-speak">🔊 Auto</button>
+  </div>
+  
+  <div id="status" class="status"></div>
+  
+  <div class="footer">© 2025 Sanskash Digital — अभ्यास जारी राख्नुहोस्</div>
 </div>
- <div class="footer">© 2025 Sanskash Digital — अभ्यास जारी राख्नुहोस्</div>
+
+<!-- Congratulations Modal -->
+<div id="congratsModal" class="modal-overlay">
+  <div class="congrats-modal">
+    <div class="stars">✦ ✦ ✦</div>
+    <h2>बधाई छ! 🎉</h2>
+    <p id="congratsMessage"></p>
+    <div id="levelBadge" class="level-badge"></div>
+    <div class="modal-buttons">
+      <button id="nextLevelBtn" class="modal-btn continue">अर्को Level जानुहोस् →</button>
+      <button id="restartLevelBtn" class="modal-btn restart">फेरि खेल्नुहोस् ↺</button>
+      <button id="goHomeBtn" class="modal-btn home">🏠 गृह पृष्ठमा जानुहोस्</button>
+    </div>
+  </div>
+</div>
+
+<!-- All Levels Complete Modal -->
+<div id="allCompleteModal" class="modal-overlay">
+  <div class="congrats-modal all-complete-modal">
+    <div class="trophy">🏆</div>
+    <h2>धेरै बधाई छ! 👑</h2>
+    <p>तपाईंले सबै Level हरू सफलतापूर्वक पूरा गर्नुभयो!</p>
+    <p>तपाईंले <span id="finalCorrect">0</span> सही र <span id="finalWrong">0</span> गलत जवाफ दिनुभयो।</p>
+    <div class="level-badge">वर्णमाला मास्टर 🌟</div>
+    <div class="modal-buttons">
+      <button id="restartAllBtn" class="modal-btn restart">फेरि सुरु गर्नुहोस्</button>
+      <button id="homeBtn" class="modal-btn home">🏠 गृह पृष्ठमा जानुहोस्</button>
+    </div>
+  </div>
+</div>
 
 <script>
 // ------------------------------
-//   LEVEL DATA
+//   LEVEL DATA (Same as original)
 // ------------------------------
 const levels = [
-  ["क", "ख", "ग", "घ", "ङ"],
-  ["च", "छ", "ज", "झ", "ञ"],
-  ["ट", "ठ", "ड", "ढ", "ण"],
-  ["त", "थ", "द", "ध", "न"],
-  ["प", "फ", "ब", "भ", "म"],
-  ["य", "र", "ल", "व"],
-  ["श", "ष", "स", "ह", "क्ष", "त्र", "ज्ञ"]
+  {name: "Level 1 – क वर्ग", letters: ["क", "ख", "ग", "घ", "ङ"]},
+  {name: "Level 2 – च वर्ग", letters: ["च", "छ", "ज", "झ", "ञ"]},
+  {name: "Level 3 – ट वर्ग", letters: ["ट", "ठ", "ड", "ढ", "ण"]},
+  {name: "Level 4 – त वर्ग", letters: ["त", "थ", "द", "ध", "न"]},
+  {name: "Level 5 – प वर्ग", letters: ["प", "फ", "ब", "भ", "म"]},
+  {name: "Level 6 – अन्तःस्थ", letters: ["य", "र", "ल", "व"]},
+  {name: "Level 7 – ऊष्म र संयुक्त", letters: ["श", "ष", "स", "ह", "क्ष", "त्र", "ज्ञ"]}
 ];
 
+const correctNeededPerLevel = 10; // Need 10 correct answers to advance
+
+// ------------------------------
+//   GAME STATE
+// ------------------------------
 let currentLevel = 0;
-let correctNeeded = 10;   // ⭐ Level change after 10 correct
 let score = 0;
-
-let currentCorrectLetter = "";
+let wrong = 0;
 let tryCount = 0;
-
-// DOM elements
-const levelTitle = document.getElementById("level-title");
-const questionBox = document.getElementById("question");
-const optionsBox = document.getElementById("options");
-const scoreBox = document.getElementById("score");
-const triesBox = document.getElementById("tries");
+let currentCorrectLetter = "";
+let autoSpeakEnabled = true;
+let speechSynthesis = window.speechSynthesis;
 
 // ------------------------------
-//   VOICE FUNCTION
+//   DOM ELEMENTS
 // ------------------------------
-function speak(text) {
-  const msg = new SpeechSynthesisUtterance();
-  msg.text = text;
-  msg.lang = "ne-NP";
-  msg.rate = 0.8;
-  window.speechSynthesis.speak(msg);
+const questionEl = document.getElementById("questionLetter");
+const optionsGrid = document.getElementById("optionsGrid");
+const correctEl = document.getElementById("correctCount");
+const wrongEl = document.getElementById("wrongCount");
+const tryCountEl = document.getElementById("tryCount");
+const correctNeededEl = document.getElementById("correctNeeded");
+const levelDisplayEl = document.getElementById("currentLevelDisplay");
+const statusEl = document.getElementById("status");
+const speakQuestionBtn = document.getElementById("speakQuestionBtn");
+const soundBtn = document.querySelector(".sound-btn.speak-question");
+const autoSpeakBtn = document.getElementById("autoSpeakBtn");
+
+// ------------------------------
+//   MODAL ELEMENTS
+// ------------------------------
+const congratsModal = document.getElementById("congratsModal");
+const allCompleteModal = document.getElementById("allCompleteModal");
+const congratsMessageEl = document.getElementById("congratsMessage");
+const levelBadgeEl = document.getElementById("levelBadge");
+const finalCorrectEl = document.getElementById("finalCorrect");
+const finalWrongEl = document.getElementById("finalWrong");
+
+// ------------------------------
+//   TEXT-TO-SPEECH FUNCTIONS
+// ------------------------------
+function speakNepaliLetter(letter, type = 'question') {
+  if (!speechSynthesis) return;
+  
+  speechSynthesis.cancel();
+  
+  if (!letter) return;
+  
+  const utterance = new SpeechSynthesisUtterance(letter);
+  utterance.lang = 'ne-NP';
+  utterance.rate = 0.8;
+  utterance.pitch = 1.0;
+  utterance.volume = 1.0;
+  
+  soundBtn.classList.add('speaking');
+  
+  utterance.onstart = function() {
+    console.log(`Speaking letter: ${letter}`);
+  };
+  
+  utterance.onend = function() {
+    soundBtn.classList.remove('speaking');
+  };
+  
+  utterance.onerror = function(event) {
+    console.error('Speech synthesis error:', event);
+    soundBtn.classList.remove('speaking');
+    showStatus("🔇 Sound not available", "#ff6b6b", 2000);
+  };
+  
+  speechSynthesis.speak(utterance);
+}
+
+function speakQuestionLetter() {
+  const letter = questionEl.textContent;
+  if (letter) {
+    speakNepaliLetter(letter, 'question');
+  }
+}
+
+function toggleAutoSpeak() {
+  autoSpeakEnabled = !autoSpeakEnabled;
+  autoSpeakBtn.textContent = autoSpeakEnabled ? "🔊 Auto ON" : "🔇 Auto OFF";
+  autoSpeakBtn.style.background = autoSpeakEnabled 
+    ? "linear-gradient(135deg, #9b59b6, #8e44ad)" 
+    : "linear-gradient(135deg, #95a5a6, #7f8c8d)";
+  
+  showStatus(
+    autoSpeakEnabled ? "Auto-speak: ON" : "Auto-speak: OFF", 
+    autoSpeakEnabled ? "#2ecc71" : "#e74c3c", 
+    1500
+  );
 }
 
 // ------------------------------
-//   GAME START
+//   GAME FUNCTIONS
 // ------------------------------
-loadLevel();
+function updateCounters() {
+  correctEl.textContent = score;
+  wrongEl.textContent = wrong;
+  tryCountEl.textContent = tryCount;
+  correctNeededEl.textContent = correctNeededPerLevel;
+}
+
+function updateLevelDisplay() {
+  levelDisplayEl.textContent = levels[currentLevel].name;
+}
+
+function showStatus(msg, color = "black", t = 2000) {
+  statusEl.style.color = color;
+  statusEl.textContent = msg;
+  clearTimeout(statusEl._t);
+  statusEl._t = setTimeout(() => statusEl.textContent = "", t);
+}
 
 function loadLevel() {
   score = 0;
-  scoreBox.textContent = `Correct: 0 / ${correctNeeded}`;
-  levelTitle.textContent = `Level ${currentLevel + 1}`;
+  wrong = 0;
+  updateLevelDisplay();
+  updateCounters();
   createQuestion();
+  showStatus(levels[currentLevel].name, "#333", 2500);
 }
 
-// ------------------------------
-//   CREATE QUESTION
-// ------------------------------
 function createQuestion() {
-  optionsBox.innerHTML = "";
+  optionsGrid.innerHTML = "";
   tryCount = 0;
-  triesBox.textContent = `Try: 0 / 3`;
-
-  let letters = levels[currentLevel];
+  updateCounters();
+  
+  const letters = [...levels[currentLevel].letters];
   currentCorrectLetter = letters[Math.floor(Math.random() * letters.length)];
-
-  questionBox.textContent = currentCorrectLetter;
-  speak(currentCorrectLetter);
-
-  letters.forEach(letter => {
-    let btn = document.createElement("button");
+  
+  questionEl.textContent = currentCorrectLetter;
+  
+  // Auto-speak the new letter
+  if (autoSpeakEnabled) {
+    setTimeout(() => speakNepaliLetter(currentCorrectLetter, 'question'), 500);
+  }
+  
+  // Shuffle letters for options
+  const shuffledLetters = [...letters].sort(() => Math.random() - 0.5);
+  
+  shuffledLetters.forEach(letter => {
+    const btn = document.createElement("button");
     btn.className = "option-btn";
     btn.textContent = letter;
-
+    btn.dataset.letter = letter;
+    
     btn.onclick = () => {
-      speak(letter);
-      speak(currentCorrectLetter); 
-      checkAnswer(letter);
+      checkAnswer(letter, btn);
     };
-
-    optionsBox.appendChild(btn);
+    
+    optionsGrid.appendChild(btn);
   });
+  
+  showStatus("नयाँ अक्षरको लागि प्रयास गर्नुहोस्", "#444", 1500);
 }
 
-// ------------------------------
-//   CHECK ANSWER (WITH 3 TRY LIMIT)
-// ------------------------------
-function checkAnswer(selected) {
-
-  if (selected === currentCorrectLetter) {
+function checkAnswer(selectedLetter, button) {
+  if (selectedLetter === currentCorrectLetter) {
+    // Correct answer
+    button.classList.add('correct');
     score++;
-    scoreBox.textContent = `Correct: ${score} / ${correctNeeded}`;
-
-    // ⭐⭐ LEVEL CHANGE LOGIC (10 correct)
-    if (score >= correctNeeded) {
-      nextLevel();
+    
+    // Speak both letters for comparison
+    if (autoSpeakEnabled) {
+      speakNepaliLetter(currentCorrectLetter, 'question');
+    }
+    
+    showStatus("✔ सही! धेरै राम्रो!", "green");
+    
+    // Check if level is complete (10 correct answers)
+    if (score >= correctNeededPerLevel) {
+      showLevelCompleteModal();
       return;
     }
-
-    createQuestion();
-    return;
+    
+    setTimeout(createQuestion, 1000);
+  } else {
+    // Wrong answer
+    button.classList.add('wrong');
+    tryCount++;
+    
+    // Speak both letters so child can hear the difference
+    if (autoSpeakEnabled) {
+      speakNepaliLetter(currentCorrectLetter, 'question');
+      setTimeout(() => {
+        speakNepaliLetter(selectedLetter, 'answer');
+      }, 800);
+    }
+    
+    if (tryCount >= 3) {
+      showStatus("❌ 3 प्रयास सकियो, अर्को अक्षरमा जानुहोस्", "red");
+      setTimeout(createQuestion, 1500);
+    } else {
+      showStatus(`✖ मिलेन! बाँकी प्रयास: ${3 - tryCount}`, "red");
+    }
+    
+    wrong++;
   }
+  
+  updateCounters();
+}
 
-  tryCount++;
-  triesBox.textContent = `Try: ${tryCount} / 3`;
-
-  if (tryCount >= 3) {
-    createQuestion();
+function showLevelCompleteModal(isAllComplete = false) {
+  if (isAllComplete) {
+    finalCorrectEl.textContent = score;
+    finalWrongEl.textContent = wrong;
+    allCompleteModal.style.display = 'flex';
+  } else {
+    const nextLevel = currentLevel + 1;
+    const levelName = levels[currentLevel].name;
+    
+    let congratsText = "";
+    if (currentLevel === 0) {
+      congratsText = "तपाईंले पहिलो Level सजिलै पार गर्नुभयो!";
+    } else if (nextLevel === levels.length) {
+      congratsText = "अन्तिम Level पूरा गर्नुभयो!";
+    } else {
+      congratsText = "तपाईंको प्रगति धेरै राम्रो छ!";
+    }
+    
+    congratsMessageEl.textContent = congratsText;
+    levelBadgeEl.textContent = levelName;
+    congratsModal.style.display = 'flex';
   }
 }
 
-// ------------------------------
-//   NEXT LEVEL
-// ------------------------------
 function nextLevel() {
   currentLevel++;
-
+  
   if (currentLevel >= levels.length) {
-    alert("Great job! You completed all levels!");
-    currentLevel = 0;
+    // All levels completed
+    showLevelCompleteModal(true);
   } else {
-    alert("Level Complete! Next Level Starting...");
+    congratsModal.style.display = 'none';
+    loadLevel();
   }
-
-  loadLevel();
 }
+
+// ------------------------------
+//   BUTTON CONTROLS
+// ------------------------------
+skipBtn.onclick = () => {
+  createQuestion();
+  showStatus("अक्षर स्किप गरियो", "#f39c12");
+};
+
+hintBtn.onclick = () => {
+  speakNepaliLetter(currentCorrectLetter, 'question');
+  showStatus("अक्षर सुनाइयो", "#3498db", 1500);
+};
+
+resetLevelBtn.onclick = () => {
+  score = 0;
+  wrong = 0;
+  loadLevel();
+  showStatus("Level रिसेट गरियो", "#e74c3c", 1500);
+};
+
+// ------------------------------
+//   SOUND CONTROLS
+// ------------------------------
+speakQuestionBtn.onclick = speakQuestionLetter;
+soundBtn.onclick = speakQuestionLetter;
+autoSpeakBtn.onclick = toggleAutoSpeak;
+
+// ------------------------------
+//   MODAL CONTROLS
+// ------------------------------
+nextLevelBtn.onclick = () => {
+  nextLevel();
+};
+
+restartLevelBtn.onclick = () => {
+  congratsModal.style.display = 'none';
+  loadLevel();
+};
+
+// NEW: Go Home button for level completion modal
+document.getElementById('goHomeBtn').onclick = () => {
+  window.location.href = 'index.html';
+};
+
+// Existing Home button for all levels complete modal
+homeBtn.onclick = () => {
+  window.location.href = 'index.html';
+};
+
+restartAllBtn.onclick = () => {
+  allCompleteModal.style.display = 'none';
+  currentLevel = 0;
+  loadLevel();
+};
+
+// Close modal when clicking outside
+congratsModal.onclick = (e) => {
+  if (e.target === congratsModal) congratsModal.style.display = 'none';
+};
+
+allCompleteModal.onclick = (e) => {
+  if (e.target === allCompleteModal) allCompleteModal.style.display = 'none';
+};
+
+// ------------------------------
+//   INITIALIZE GAME
+// ------------------------------
+loadLevel();
+
+// Check if browser supports speech synthesis
+if (!('speechSynthesis' in window)) {
+  showStatus("🔇 Your browser doesn't support speech", "#e74c3c", 3000);
+  soundBtn.disabled = true;
+  autoSpeakBtn.disabled = true;
+}
+
+// Handle page visibility for speech
+document.addEventListener('visibilitychange', function() {
+  if (document.hidden) {
+    speechSynthesis.cancel();
+  }
+});
 </script>
 </body>
 </html>
