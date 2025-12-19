@@ -492,6 +492,11 @@ html,body{
       <button id="speakTypedBtn" class="sound-btn speak-typed" title="Speak typed word" aria-label="Speak typed word" disabled>📢</button>
       <span class="sound-status">Click 🔊 to hear words</span>
     </div>
+    <div class="counters">
+    <div>सही: <span id="correctCount">0</span></div>
+    <div>गलत: <span id="wrongCount">0</span></div>
+    <div>जम्मा: <span id="totalCount">0</span></div>
+  </div>
   </div>
 
   <div class="word-bar">
@@ -499,12 +504,7 @@ html,body{
     <span id="speakTargetBtn" class="speak-icon" title="Hear this word" aria-label="Hear this word" role="button">🔊</span>
   </div>
 
-  <div class="counters">
-    <div>सही: <span id="correctCount">0</span></div>
-    <div>गलत: <span id="wrongCount">0</span></div>
-    <div>जम्मा: <span id="totalCount">0</span></div>
-  </div>
-
+  
   <div id="output" class="output">
     <span id="typedWord"></span>
     <span id="speakTypedOutputBtn" class="speak-icon" title="Hear your typed word" aria-label="Hear your typed word" role="button">🔊</span>
@@ -997,3 +997,4 @@ document.addEventListener('visibilitychange', function() {
 </script>
 </body>
 </html>
+
