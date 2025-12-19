@@ -1,0 +1,999 @@
+<!doctype html>
+<html lang="ne">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>नेपाली शब्द अभ्यास — Level Game</title>
+
+<style>
+:root{
+  --bg1:#fff4f6;
+  --bg2:#e8f6ff;
+  --card:#ffffff;
+  --accent:#ff6f91;
+  --accent2:#ff9a76;
+  --key:#ffd54a;
+  --muted:#666;
+  --success:#2ecc71;
+  --warning:#f39c12;
+  --info:#3498db;
+}
+*{box-sizing:border-box}
+html,body{
+  height:100%;margin:0;
+  font-family:'Mangal', 'Arial', sans-serif;
+  background:linear-gradient(135deg,var(--bg1),var(--bg2));
+  overflow-x:hidden;
+}
+.container{
+  max-width:920px;margin:0 auto;padding:12px;
+  background:var(--card);border-radius:12px;
+  box-shadow:0 4px 20px rgba(0,0,0,0.05);
+  display:flex;flex-direction:column;gap:10px;
+  min-height:100vh;
+}
+
+/* Header - Mobile Optimized */
+.header{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding:8px 0;
+}
+.header-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:10px;
+}
+.title{
+  color:var(--accent);
+  font-size:clamp(16px, 4vw, 20px);
+  font-weight:700;
+  flex:1;
+  min-width:200px;
+}
+
+/* Level Indicator */
+.level-indicator {
+  background: linear-gradient(135deg, var(--info), #8e44ad);
+  color: white;
+  padding:6px 12px;
+  border-radius:18px;
+  font-weight:bold;
+  align-items:center;
+  text-align: center;
+  gap:6px;
+  font-size:clamp(12px, 3vw, 14px);
+  box-shadow:0 3px 8px rgba(52, 152, 219, 0.3);
+  white-space:nowrap;
+}
+.level-indicator::before {
+  content: "🎯";
+}
+
+/* Sound Controls */
+.sound-controls {
+  display: flex;
+  flex-wrap:wrap;
+  gap:8px;
+  align-items:center;
+  margin:5px 0;
+  justify-content:center;
+}
+
+.sound-btn {
+  background: linear-gradient(135deg, #00b09b, #96c93d);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width:40px;
+  height:40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+  flex-shrink:0;
+}
+
+.sound-btn.speak-display {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+}
+
+.sound-btn.speak-typed {
+  background: linear-gradient(135deg, #9b59b6, #8e44ad);
+}
+
+.sound-btn:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+  opacity:0.6;
+}
+
+.sound-status {
+  font-size: clamp(12px, 3vw, 14px);
+  color: var(--muted);
+  text-align:center;
+}
+
+/* Word Bar */
+.word-bar{
+  background:#0b0b0b;
+  color:#00ffe0;
+  padding:10px 15px;
+  border-radius:10px;
+  font-size:clamp(20px, 6vw, 26px);
+  text-align:center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  flex-wrap:wrap;
+  margin:5px 0;
+}
+.word-bar .speak-icon {
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  padding:6px;
+  font-size: clamp(16px, 4vw, 20px);
+  transition: all 0.2s ease;
+  flex-shrink:0;
+}
+
+/* Counters */
+.counters{
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  font-weight:700;
+  color:var(--muted);
+  font-size:clamp(13px, 3vw, 15px);
+  flex-wrap:wrap;
+}
+.counters > div {
+  padding:5px 12px;
+  background:#f8f9fa;
+  border-radius:20px;
+  min-width:80px;
+  text-align:center;
+}
+
+/* Output Area */
+.output{
+  background:#fffbea;
+  border:2px solid #ffd6a5;
+  border-radius:10px;
+  min-height:60px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:clamp(22px, 7vw, 28px);
+  position:relative;
+  padding:10px 50px 10px 10px;
+  margin:5px 0;
+  overflow:hidden;
+}
+.output .speak-icon {
+  position: absolute;
+  right:10px;
+  cursor: pointer;
+  background: rgba(255, 214, 165, 0.3);
+  border-radius: 50%;
+  padding:5px;
+  font-size: clamp(16px, 4vw, 18px);
+  transition:all 0.2s ease;
+}
+
+/* Controls - Mobile Optimized */
+.controls{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(100px, 1fr));
+  gap:8px;
+  margin:5px 0;
+}
+.btn{
+  padding:10px 8px;
+  border-radius:10px;
+  border:0;
+  font-weight:700;
+  cursor:pointer;
+  background:#a0c4ff;
+  transition:all 0.2s ease;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  font-size:clamp(13px, 3vw, 14px);
+  min-height:44px; /* Better touch target */
+  white-space:nowrap;
+}
+.btn:hover{
+  transform:translateY(-2px);
+}
+.btn.secondary{background:#ffd1dc}
+.btn.sound{
+  background:linear-gradient(135deg, #9b59b6, #8e44ad);
+  color:white;
+}
+
+/* Status */
+.status{
+  text-align:center;
+  font-weight:700;
+  font-size:clamp(14px, 4vw, 18px);
+  min-height:28px;
+  padding:4px;
+  margin:5px 0;
+}
+
+/* Keyboard - Mobile Optimized */
+.keyboard-wrap{
+  flex:1;
+  max-height:40vh;
+  overflow-y:auto;
+  padding:10px;
+  border-radius:10px;
+  background:linear-gradient(180deg,#fff,#fff8);
+  margin:5px 0;
+}
+.vowel-grid,.cons-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(50px, 1fr));
+  gap:6px;
+  margin-bottom:10px;
+}
+.key,.vowel-btn{
+  background:var(--key);
+  border-radius:8px;
+  padding:8px 4px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+  cursor:pointer;
+  transition:transform .12s;
+  min-height:50px;
+  font-size:clamp(16px, 4vw, 18px);
+  user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+.key:hover,.vowel-btn:hover{
+  transform:scale(1.05);
+  background:var(--accent2)
+}
+.vowel-btn .big{font-size:clamp(18px, 4vw, 22px)}
+.vowel-btn .small{
+  font-size:clamp(14px, 3vw, 16px);
+  margin-top:3px;
+  background:#fff7f0;
+  padding:2px 4px;
+  border-radius:4px;
+}
+
+/* Footer */
+.footer{
+  text-align:center;
+  font-size:clamp(11px, 2.5vw, 13px);
+  color:var(--muted);
+  padding:10px 0 5px;
+  margin-top:auto;
+}
+
+/* Speaking Animation */
+.speaking {
+  animation: pulseSpeaking 0.8s infinite;
+}
+
+@keyframes pulseSpeaking {
+  0%, 100% { 
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7);
+  }
+  50% { 
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(52, 152, 219, 0);
+  }
+}
+
+/* Congratulations Modal - Mobile Optimized */
+.modal-overlay {
+  position:fixed;
+  top:0;left:0;right:0;bottom:0;
+  background:rgba(0,0,0,0.8);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:1000;
+  backdrop-filter:blur(5px);
+  padding:15px;
+}
+
+.congrats-modal {
+  background:linear-gradient(135deg,#ff9a9e,#fad0c4);
+  padding:clamp(20px, 5vw, 40px) clamp(15px, 4vw, 30px);
+  border-radius:clamp(15px, 4vw, 20px);
+  text-align:center;
+  max-width:500px;
+  width:100%;
+  box-shadow:0 10px 25px rgba(0,0,0,0.3);
+  animation:modalSlideIn 0.5s ease-out;
+  border:clamp(4px, 2vw, 8px) solid #fff;
+  position:relative;
+  overflow:hidden;
+}
+
+.congrats-modal h2 {
+  color:#d63031;
+  font-size:clamp(20px, 6vw, 32px);
+  margin:0 0 15px;
+}
+
+.congrats-modal p {
+  font-size:clamp(16px, 4vw, 20px);
+  color:#333;
+  margin:12px 0;
+  line-height:1.4;
+}
+
+.congrats-modal .level-badge {
+  display:inline-block;
+  background:linear-gradient(135deg,#ff7675,#fd79a8);
+  color:white;
+  padding:clamp(8px, 3vw, 10px) clamp(15px, 4vw, 25px);
+  border-radius:50px;
+  font-size:clamp(18px, 4vw, 24px);
+  font-weight:bold;
+  margin:15px auto;
+}
+
+.congrats-modal .stars {
+  font-size:clamp(24px, 8vw, 40px);
+  color:#FFD700;
+  margin:15px 0;
+}
+
+.congrats-modal .modal-buttons {
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  justify-content:center;
+  margin-top:20px;
+}
+
+.modal-btn {
+  padding:clamp(10px, 3vw, 12px) clamp(15px, 4vw, 25px);
+  border:none;
+  border-radius:10px;
+  font-size:clamp(14px, 3vw, 16px);
+  font-weight:bold;
+  cursor:pointer;
+  transition:all 0.3s ease;
+  min-height:44px;
+}
+
+/* Animations */
+@keyframes modalSlideIn {
+  from {
+    opacity:0;
+    transform:translateY(-30px) scale(0.95);
+  }
+  to {
+    opacity:1;
+    transform:translateY(0) scale(1);
+  }
+}
+
+@keyframes bounce {
+  from { transform:translateY(0); }
+  to { transform:translateY(-8px); }
+}
+
+/* Mobile Landscape Optimization */
+@media (orientation: landscape) and (max-height: 600px) {
+  .container {
+    padding:8px;
+    gap:6px;
+  }
+  .keyboard-wrap {
+    max-height:30vh;
+  }
+  .output {
+    min-height:50px;
+    font-size:20px;
+  }
+  .btn {
+    min-height:36px;
+    padding:6px 4px;
+  }
+}
+
+/* Tablet Optimization */
+@media (min-width: 768px) {
+  .controls {
+    grid-template-columns:repeat(auto-fit, minmax(120px, 1fr));
+  }
+  .vowel-grid, .cons-grid {
+    grid-template-columns:repeat(auto-fit,minmax(60px, 1fr));
+    gap:8px;
+  }
+  .congrats-modal .modal-buttons {
+    flex-direction:row;
+  }
+}
+
+/* Large Mobile (iPhone Plus sizes) */
+@media (max-width: 414px) and (max-height: 736px) {
+  .key, .vowel-btn {
+    min-height:45px;
+    padding:6px 3px;
+  }
+  .word-bar {
+    padding:8px 12px;
+  }
+}
+
+/* Small Mobile (iPhone SE) */
+@media (max-width: 375px) and (max-height: 667px) {
+  .container {
+    padding:8px;
+  }
+  .controls {
+    grid-template-columns:repeat(3, 1fr);
+  }
+  .key, .vowel-btn {
+    font-size:16px;
+    min-height:42px;
+  }
+  .vowel-btn .big {
+    font-size:16px;
+  }
+  .word-bar {
+    font-size:18px;
+    gap:8px;
+  }
+}
+
+/* Prevent zoom on input for iOS */
+@media (max-width: 768px) {
+  input, select, textarea {
+    font-size:16px !important;
+  }
+  .btn, .key, .vowel-btn {
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+  }
+}
+
+/* High DPI screens */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .btn, .key, .vowel-btn, .sound-btn {
+    border:1px solid rgba(0,0,0,0.1);
+  }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="header-top">
+      <div class="title">नेपाली शब्द अभ्यास (Level Game)</div>
+      <a href="index.html" class="btn" style="background:var(--accent);color:#fff;text-decoration:none;padding:8px 12px;font-size:14px">Home</a>
+    </div>
+    <div id="currentLevelDisplay" class="level-indicator">Level 1: Basic</div>
+    <div class="sound-controls">
+      <button id="speakDisplayBtn" class="sound-btn speak-display" title="Speak displayed word" aria-label="Speak displayed word">🔊</button>
+      <button id="speakTypedBtn" class="sound-btn speak-typed" title="Speak typed word" aria-label="Speak typed word" disabled>📢</button>
+      <span class="sound-status">Click 🔊 to hear words</span>
+    </div>
+  </div>
+
+  <div class="word-bar">
+    <span>शब्द: <span id="targetWord"></span></span>
+    <span id="speakTargetBtn" class="speak-icon" title="Hear this word" aria-label="Hear this word" role="button">🔊</span>
+  </div>
+
+  <div class="counters">
+    <div>सही: <span id="correctCount">0</span></div>
+    <div>गलत: <span id="wrongCount">0</span></div>
+    <div>जम्मा: <span id="totalCount">0</span></div>
+  </div>
+
+  <div id="output" class="output">
+    <span id="typedWord"></span>
+    <span id="speakTypedOutputBtn" class="speak-icon" title="Hear your typed word" aria-label="Hear your typed word" role="button">🔊</span>
+  </div>
+
+  <div class="controls">
+    <button class="btn" id="checkBtn" aria-label="Check answer">Check ✔</button>
+    <button class="btn secondary" id="skipBtn" aria-label="Skip word">Skip ⤼</button>
+    <button class="btn secondary" id="resetBtn" aria-label="Reset typed word">Reset ↺</button>
+    <button class="btn secondary" id="delBtn" aria-label="Delete last character">Delete ←</button>
+    <button class="btn secondary" id="chandraBtn" aria-label="Add chandrabindu">ँ</button>
+    <button class="btn secondary" id="halantBtn" aria-label="Add halant">्</button>
+    <button class="btn sound" id="autoSpeakBtn" title="Toggle auto-speak" aria-label="Toggle auto-speak">🔊 Auto</button>
+  </div>
+
+  <div id="status" class="status"></div>
+
+  <div class="keyboard-wrap">
+    <div id="vowelGrid" class="vowel-grid"></div>
+    <div id="consGrid" class="cons-grid"></div>
+  </div>
+
+  <div class="footer">© 2025 Sanskash Digital</div>
+</div>
+
+<!-- Congratulations Modal -->
+<div id="congratsModal" class="modal-overlay">
+  <div class="congrats-modal">
+    <div class="stars">✦ ✦ ✦</div>
+    <h2>बधाई छ! 🎉</h2>
+    <p id="congratsMessage"></p>
+    <div id="levelBadge" class="level-badge"></div>
+    <div class="modal-buttons">
+      <button id="nextLevelBtn" class="modal-btn continue">अर्को Level जानुहोस् →</button>
+      <button id="restartBtn" class="modal-btn restart">फेरि खेल्नुहोस् ↺</button>
+    </div>
+  </div>
+</div>
+
+<!-- All Levels Complete Modal -->
+<div id="allCompleteModal" class="modal-overlay">
+  <div class="congrats-modal all-complete-modal">
+    <div class="trophy">🏆</div>
+    <h2>धेरै बधाई छ! 👑</h2>
+    <p>तपाईंले सबै Level हरू सफलतापूर्वक पूरा गर्नुभयो!</p>
+    <p>तपाईंले <span id="finalCorrect">0</span> सही र <span id="finalWrong">0</span> गलत जवाफ दिनुभयो।</p>
+    <div class="level-badge">मास्टर अब्दज्ञ 🌟</div>
+    <div class="modal-buttons">
+      <button id="restartAllBtn" class="modal-btn restart">फेरि सुरु गर्नुहोस्</button>
+      <button id="homeBtn" class="modal-btn continue">गृह पृष्ठमा जानुहोस्</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------- DATA ---------- */
+const consonants = ['क','ख','ग','घ','ङ','च','छ','ज','झ','ञ','ट','ठ','ड','ढ','ण','त','थ','द','ध','न','प','फ','ब','भ','म','य','र','ल','व','श','ष','स','ह','क्ष','त्र','ज्ञ'];
+const vowels = ['अ','आ','इ','ई','उ','ऊ','ऋ','ए','ऐ','ओ','औ','अं','अः'];
+const maatraMap = {'अ':'','आ':'ा','इ':'ि','ई':'ी','उ':'ु','ऊ':'ू','ऋ':'ृ','ए':'े','ऐ':'ै','ओ':'ो','औ':'ौ','अं':'ं','अः':'ः'};
+
+const levels = [
+  {name:"Level 1 – Basic", words:["काका","मामा","जामा","आमा","बाबा","माला","ताल","छाल","नाना","दादा"]},
+  {name:"Level 2 – इ / ई", words:["किरा","तिहार","किताब","किसान","हिसाब","हिरा","चित्र","दिवस","निति","गिरि"]},
+  {name:"Level 3 – उ / ऊ / ऋ", words:["कुकुर","फूल","धूप","रुख","गुरु","कृषि","सूत्र","मूर्ति","सूर्य","भूगोल"]},
+  {name:"Level 4 – ए / ऐ", words:["केरा","सेतो","मैना","बैना","ऐना","देवी","मेहनत","पैसा","कैदी","फैलियो"]},
+  {name:"Level 5 – Final", words:["कोठा","गोला","कौवा","औषधि","कंस","अंश","संकेत","अःकार","भौंरा","चौंरी"]}
+];
+
+/* ---------- STATE ---------- */
+let currentLevel=0, levelWords=[], wordIndex=0;
+let triesLeft=3, correct=0, wrong=0, total=0;
+let lastConsonant="";
+let autoSpeakEnabled = true;
+let speechSynthesis = window.speechSynthesis;
+let isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+/* ---------- ELEMENTS ---------- */
+const targetEl=document.getElementById("targetWord");
+const typedWordEl=document.getElementById("typedWord");
+const statusEl=document.getElementById("status");
+const correctEl=document.getElementById("correctCount");
+const wrongEl=document.getElementById("wrongCount");
+const totalEl=document.getElementById("totalCount");
+const levelDisplayEl=document.getElementById("currentLevelDisplay");
+const speakTargetBtn=document.getElementById("speakTargetBtn");
+const speakTypedOutputBtn=document.getElementById("speakTypedOutputBtn");
+const speakDisplayBtn=document.getElementById("speakDisplayBtn");
+const speakTypedBtn=document.getElementById("speakTypedBtn");
+const autoSpeakBtn=document.getElementById("autoSpeakBtn");
+
+/* ---------- MODAL ELEMENTS ---------- */
+const congratsModal=document.getElementById("congratsModal");
+const allCompleteModal=document.getElementById("allCompleteModal");
+const congratsMessageEl=document.getElementById("congratsMessage");
+const levelBadgeEl=document.getElementById("levelBadge");
+const finalCorrectEl=document.getElementById("finalCorrect");
+const finalWrongEl=document.getElementById("finalWrong");
+
+/* ---------- TEXT-TO-SPEECH FUNCTIONS ---------- */
+function speakNepaliWord(text, type = 'display') {
+  if (!speechSynthesis) return;
+  
+  speechSynthesis.cancel();
+  
+  if (!text || text.trim() === '') return;
+  
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'ne-NP';
+  utterance.rate = isMobile ? 0.7 : 0.8; // Slower on mobile
+  utterance.pitch = 1.0;
+  utterance.volume = 1.0;
+  
+  const speakingElement = type === 'display' ? speakDisplayBtn : speakTypedBtn;
+  speakingElement.classList.add('speaking');
+  
+  utterance.onstart = function() {
+    if (isMobile) {
+      // On mobile, prevent screen sleep during speech
+      if (navigator.wakeLock) {
+        navigator.wakeLock.request('screen');
+      }
+    }
+  };
+  
+  utterance.onend = function() {
+    speakingElement.classList.remove('speaking');
+    if (type === 'display' && autoSpeakEnabled && typedWordEl.textContent) {
+      setTimeout(() => speakNepaliWord(typedWordEl.textContent, 'typed'), 800);
+    }
+  };
+  
+  utterance.onerror = function(event) {
+    speakingElement.classList.remove('speaking');
+    showStatus("🔇 Sound not available", "#ff6b6b", 2000);
+  };
+  
+  speechSynthesis.speak(utterance);
+}
+
+function speakDisplayedWord() {
+  const word = targetEl.textContent;
+  if (word) {
+    speakNepaliWord(word, 'display');
+  }
+}
+
+function speakTypedWord() {
+  const word = typedWordEl.textContent;
+  if (word) {
+    speakNepaliWord(word, 'typed');
+  }
+}
+
+function updateSpeakButtons() {
+  const hasTypedWord = typedWordEl.textContent.length > 0;
+  speakTypedBtn.disabled = !hasTypedWord;
+  speakTypedOutputBtn.style.display = hasTypedWord ? 'block' : 'none';
+}
+
+function toggleAutoSpeak() {
+  autoSpeakEnabled = !autoSpeakEnabled;
+  autoSpeakBtn.textContent = autoSpeakEnabled ? "🔊 Auto ON" : "🔇 Auto OFF";
+  autoSpeakBtn.style.background = autoSpeakEnabled 
+    ? "linear-gradient(135deg, #9b59b6, #8e44ad)" 
+    : "linear-gradient(135deg, #95a5a6, #7f8c8d)";
+  
+  showStatus(
+    autoSpeakEnabled ? "Auto-speak: ON" : "Auto-speak: OFF", 
+    autoSpeakEnabled ? "#2ecc71" : "#e74c3c", 
+    1500
+  );
+}
+
+/* ---------- MOBILE OPTIMIZATION FUNCTIONS ---------- */
+function setupMobileOptimizations() {
+  // Increase touch target sizes
+  if (isMobile) {
+    document.querySelectorAll('.key, .vowel-btn, .btn').forEach(btn => {
+      btn.style.minHeight = '44px';
+    });
+    
+    // Prevent double-tap zoom on buttons
+    document.addEventListener('touchstart', function(event) {
+      if (event.touches.length > 1) {
+        event.preventDefault();
+      }
+    }, { passive: false });
+  }
+  
+  // Handle virtual keyboard
+  if ('virtualKeyboard' in navigator) {
+    navigator.virtualKeyboard.overlaysContent = true;
+  }
+}
+
+/* ---------- GAME FUNCTIONS ---------- */
+function updateCounts(){
+  correctEl.textContent=correct;
+  wrongEl.textContent=wrong;
+  totalEl.textContent=total;
+}
+
+function updateLevelDisplay(){
+  levelDisplayEl.textContent = levels[currentLevel].name;
+}
+
+function showStatus(msg,color="black",t=2000){
+  statusEl.style.color=color;
+  statusEl.textContent=msg;
+  clearTimeout(statusEl._t);
+  statusEl._t=setTimeout(()=>statusEl.textContent="",t);
+}
+
+function startLevel(lv){
+  currentLevel=lv;
+  levelWords=[...levels[lv].words].sort(()=>Math.random()-0.5);
+  wordIndex=0;
+  updateLevelDisplay();
+  loadWord();
+  showStatus(levels[lv].name,"#333",2500);
+}
+
+function loadWord(){
+  triesLeft=3;
+  const word = levelWords[wordIndex];
+  targetEl.textContent=word;
+  typedWordEl.textContent="";
+  updateSpeakButtons();
+  
+  if (autoSpeakEnabled) {
+    setTimeout(() => speakNepaliWord(word, 'display'), 500);
+  }
+  
+  showStatus("प्रयास: 3","#444",1500);
+  lastConsonant="";
+}
+
+function showCongratsModal(isAllComplete = false){
+  if(isAllComplete){
+    finalCorrectEl.textContent = correct;
+    finalWrongEl.textContent = wrong;
+    allCompleteModal.style.display = 'flex';
+  } else {
+    const nextLevel = currentLevel + 1;
+    const levelName = levels[currentLevel].name.split('–')[1].trim();
+    
+    let congratsText = "";
+    if(nextLevel === 1) {
+      congratsText = "तपाईंले पहिलो Level सजिलै पार गर्नुभयो!";
+    } else if(nextLevel === levels.length) {
+      congratsText = "अन्तिम Level को लागि तयार हुनुहोस्!";
+    } else {
+      congratsText = "तपाईंको प्रगति धेरै राम्रो छ!";
+    }
+    
+    congratsMessageEl.textContent = congratsText;
+    levelBadgeEl.textContent = `Level ${nextLevel} ${levelName}`;
+    congratsModal.style.display = 'flex';
+  }
+}
+
+/* ---------- KEYBOARD ---------- */
+const vGrid = document.getElementById("vowelGrid");
+
+vowels.forEach(v=>{
+  const btn = document.createElement("div");
+  btn.className = "vowel-btn";
+  btn.setAttribute('role', 'button');
+  btn.setAttribute('aria-label', `Vowel ${v}`);
+  btn.innerHTML = `
+    <div class="big">${v}</div>
+    <div class="small">${maatraMap[v] || ""}</div>
+  `;
+
+  btn.addEventListener('click', (e)=>{
+    if (isMobile) e.preventDefault();
+    const rect = btn.getBoundingClientRect();
+    const clickY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+    
+    // Check if clicking on lower part (matra) and matra exists for this vowel
+    if (clickY > rect.top + rect.height * 0.45 && maatraMap[v]) {
+      if (lastConsonant) {
+        let s = typedWordEl.textContent;
+        
+        // Check if lastConsonant is a compound letter (क्ष, त्र, ज्ञ)
+        const compoundLetters = ['क्ष', 'त्र', 'ज्ञ'];
+        
+        if (compoundLetters.includes(lastConsonant)) {
+          // For compound letters, check if the last character(s) in the string
+          // already contain this compound letter
+          const compoundLength = lastConsonant.length;
+          
+          // Check if the last 'compoundLength' characters match the compound letter
+          const lastChars = s.slice(-compoundLength);
+          if (lastChars === lastConsonant) {
+            // If it already ends with the compound letter, just add the matra
+            typedWordEl.textContent = s + maatraMap[v];
+          } else {
+            // Otherwise add the compound letter + matra
+            typedWordEl.textContent = s + lastConsonant + maatraMap[v];
+          }
+        } else {
+          // For regular single consonants
+          // Check if the last character is the same as lastConsonant
+          if (s.slice(-1) === lastConsonant) {
+            // If it already ends with the consonant, just add the matra
+            typedWordEl.textContent = s + maatraMap[v];
+          } else {
+            // Otherwise remove last character and add consonant + matra
+            typedWordEl.textContent = s.slice(0, -1) + lastConsonant + maatraMap[v];
+          }
+        }
+      }
+      lastConsonant = "";
+    } 
+    // Clicking on upper part (full vowel)
+    else {
+      typedWordEl.textContent += v;
+      lastConsonant = "";
+    }
+    updateSpeakButtons();
+  });
+
+  // Add touch events for mobile
+  btn.addEventListener('touchstart', (e) => {
+    if (isMobile) {
+      btn.style.transform = 'scale(0.95)';
+    }
+  });
+  
+  btn.addEventListener('touchend', (e) => {
+    if (isMobile) {
+      btn.style.transform = '';
+    }
+  });
+
+  vGrid.appendChild(btn);
+});
+
+const cGrid=document.getElementById("consGrid");
+consonants.forEach(c=>{
+  const b=document.createElement("div");
+  b.className="key";
+  b.textContent=c;
+  b.setAttribute('role', 'button');
+  b.setAttribute('aria-label', `Consonant ${c}`);
+  
+  b.addEventListener('click', () => {
+    typedWordEl.textContent += c;
+    lastConsonant = c;
+    updateSpeakButtons();
+  });
+  
+  // Mobile touch feedback
+  if (isMobile) {
+    b.addEventListener('touchstart', () => {
+      b.style.transform = 'scale(0.95)';
+    });
+    
+    b.addEventListener('touchend', () => {
+      b.style.transform = '';
+    });
+  }
+  
+  cGrid.appendChild(b);
+});
+
+/* ---------- CONTROLS ---------- */
+checkBtn.onclick=()=>{
+  const typedWord = typedWordEl.textContent;
+  const targetWord = targetEl.textContent;
+  
+  total++;
+  
+  if(typedWord===targetWord){
+    correct++;
+    wordIndex++;
+    showStatus("✔ सही!","green");
+    
+    if (autoSpeakEnabled) {
+      speakNepaliWord(targetWord, 'display');
+    }
+    
+    if(wordIndex>=levelWords.length){
+      if(currentLevel<levels.length-1){
+        setTimeout(()=>showCongratsModal(false),1000);
+      } else {
+        setTimeout(()=>showCongratsModal(true),1000);
+      }
+    } else {
+      setTimeout(loadWord,700);
+    }
+  }else{
+    wrong++; triesLeft--;
+    
+    if (autoSpeakEnabled) {
+      speakNepaliWord(targetWord, 'display');
+      setTimeout(() => {
+        if (typedWord) {
+          speakNepaliWord(typedWord, 'typed');
+        }
+      }, 1000);
+    }
+    
+    if(triesLeft>0)
+      showStatus("✖ मिलेन! बाँकी: "+triesLeft,"red");
+    else{
+      showStatus("❌ प्रयास सकियो","red");
+      wordIndex++;
+      if(wordIndex<levelWords.length) setTimeout(loadWord,700);
+    }
+  }
+  updateCounts();
+};
+
+skipBtn.onclick=()=>{wordIndex++; loadWord();};
+resetBtn.onclick=()=>{
+  typedWordEl.textContent="";
+  updateSpeakButtons();
+};
+delBtn.onclick=()=>{
+  typedWordEl.textContent=typedWordEl.textContent.slice(0,-1);
+  updateSpeakButtons();
+};
+chandraBtn.onclick=()=>{
+  typedWordEl.textContent+="ँ";
+  updateSpeakButtons();
+};
+halantBtn.onclick=()=>{
+  typedWordEl.textContent+="्";
+  updateSpeakButtons();
+};
+
+/* ---------- SOUND CONTROLS ---------- */
+speakTargetBtn.onclick = speakDisplayedWord;
+speakTypedOutputBtn.onclick = speakTypedWord;
+speakDisplayBtn.onclick = speakDisplayedWord;
+speakTypedBtn.onclick = speakTypedWord;
+autoSpeakBtn.onclick = toggleAutoSpeak;
+
+/* ---------- MODAL CONTROLS ---------- */
+nextLevelBtn.onclick=()=>{
+  congratsModal.style.display='none';
+  startLevel(currentLevel+1);
+};
+
+restartBtn.onclick=()=>{
+  congratsModal.style.display='none';
+  startLevel(currentLevel);
+};
+
+restartAllBtn.onclick=()=>{
+  allCompleteModal.style.display='none';
+  correct=0; wrong=0; total=0;
+  updateCounts();
+  startLevel(0);
+};
+
+homeBtn.onclick=()=>{
+  window.location.href='index.html';
+};
+
+// Close modal when clicking outside
+congratsModal.onclick=(e)=>{
+  if(e.target===congratsModal) congratsModal.style.display='none';
+};
+allCompleteModal.onclick=(e)=>{
+  if(e.target===allCompleteModal) allCompleteModal.style.display='none';
+};
+
+/* ---------- INITIALIZE ---------- */
+setupMobileOptimizations();
+startLevel(0);
+updateCounts();
+
+// Check browser support
+if (!('speechSynthesis' in window)) {
+  showStatus("🔇 Your browser doesn't support speech", "#e74c3c", 3000);
+  speakDisplayBtn.disabled = true;
+  speakTypedBtn.disabled = true;
+  autoSpeakBtn.disabled = true;
+}
+
+// Handle page visibility for speech
+document.addEventListener('visibilitychange', function() {
+  if (document.hidden) {
+    speechSynthesis.cancel();
+  }
+});
+</script>
+</body>
+</html>
